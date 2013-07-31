@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'grafter/cli'
+
+Grafter::Cli::Main.start(ARGV)
