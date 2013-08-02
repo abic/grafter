@@ -1,6 +1,6 @@
 module Grafter
   class YumBootstrap
-    include Installable
+    include Graftable
 
     def initialize(target)
       @target = target
@@ -11,31 +11,31 @@ module Grafter
 
     def install
       FileUtils.mkdir_p(path_in_target('/var/lib/rpm'))
-      run('rpm', '--rebuilddb', '--root', target)
-      run('rpm', '-i', '--root', target, '--nodeps', release_rpm)
+      run(['rpm', '--root', target, '--rebuilddb'])
+      run(['rpm', '--root', target, '-i', '--nodeps', release_rpm])
       with_bind_from_target('/etc/pki') do
-        run('yum', '-y', '--installroot', target, 'install', 'yum')
+        run(['yum', '--installroot', target, '-y', 'install', 'yum'])
       end
-      FileUtils.cp('/etc/resolv.conf', path_in_target('/etc/resolv.conf'))
-      Chroot.new(target).use do |chroot|
-        chroot.run('rpm', '-i', '--nodeps', release_rpm)
-        chroot.run('yum', '-y', 'groupinstall', 'Base')
 
-        # install via chef
-        # chroot.run('rpm', '-i', '--nodeps', epel_release_rpm)
-        # chroot.run('yum', '-y', 'groupinstall', 'Development Tools')
-        # packages = %w(libyaml-devel libxslt-devel zlib-devel openssl-devel sudo readline-devel libffi-devel openssh-server)
-        # chroot.run('yum', '-y', 'install', *packages)
+      FileUtils.cp('/etc/resolv.conf', path_in_target('/etc/resolv.conf'))
+      using_chroot do |chroot|
+        chroot.run(['rpm', '-i', '--nodeps', release_rpm])
+        chroot.run(%w(yum -y groupinstall Base))
       end
+      # install via chef
+      # chroot.run('rpm', '-i', '--nodeps', epel_release_rpm)
+      # chroot.run('yum', '-y', 'groupinstall', 'Development Tools')
+      # packages = %w(libyaml-devel libxslt-devel zlib-devel openssl-devel sudo readline-devel libffi-devel openssh-server)
+      # chroot.run('yum', '-y', 'install', *packages)
     end
 
     def with_bind_from_target(dir)
       had_dir = Dir.exists?(dir)
       FileUtils.mkdir(dir) unless had_dir
-      run('mount', '-o', 'bind', path_in_target(dir), dir)
+      run(['mount', '-o', 'bind', path_in_target(dir), dir])
       yield
     ensure
-      run('umount', dir)
+      run(['umount', dir])
       FileUtils.rmdir(dir) unless had_dir
     end
 

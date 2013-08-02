@@ -1,9 +1,9 @@
 
 
 require 'grafter/command'
-require 'grafter/installable'
+require 'grafter/graftable'
 require 'grafter/chroot'
 require 'grafter/chef'
 require 'grafter/debootstrap'
 require 'grafter/yum_bootstrap'
-require 'grafter/graft'
+require 'grafter/root'

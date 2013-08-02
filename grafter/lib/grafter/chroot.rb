@@ -26,19 +26,24 @@ module Grafter
       unmount :proc
     end
 
-    def run(*args)
-      Command.new('chroot', target, 'env', '-i', 'HOME=/root', *args).run
+    def run(args, options={})
+      env = ENV.to_hash.select { |k| %w(TERM LANG).include?(k) }.merge(
+        'LC_ALL' => 'C',
+        'HOME' => '/root',
+        'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+      )
+      Command.new([env, 'chroot', target, *args, options.merge(unsetenv_others: true)]).run
     end
 
     private
     attr_reader :target
 
     def mount(fs)
-      Command.new('mount', '-o', 'bind', MOUNTS.fetch(fs), File.join(target, MOUNTS.fetch(fs))).run
+      Command.new(['mount', '-o', 'bind', MOUNTS.fetch(fs), File.join(target, MOUNTS.fetch(fs))]).run
     end
 
     def unmount(fs)
-      Command.new('umount', File.join(target, MOUNTS.fetch(fs))).run
+      Command.new(['umount', File.join(target, MOUNTS.fetch(fs))]).run
     end
   end
 end

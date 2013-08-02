@@ -1,10 +1,10 @@
 module Grafter
 
-  class Graft
-    BASE_DIR = '/var/lib/grafter/grafts'
+  class Root
+    BASE_DIR = '/var/lib/grafter/roots'
 
     def self.list
-      Dir.glob(File.join(BASE_DIR, '*')).map { |f| File.basename(f) }
+      Dir.entries(BASE_DIR).reject { |f| f =~ /^\./ }
     end
 
     TYPES = {
@@ -19,10 +19,9 @@ module Grafter
       @type = type
     end
 
-    def install
+    def create
       FileUtils.mkdir_p(BASE_DIR)
       TYPES.fetch(type).new(target).install
-      Chef.new(target).install
     end
 
     # TODO

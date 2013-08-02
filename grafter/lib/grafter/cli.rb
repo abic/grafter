@@ -3,27 +3,38 @@ require 'thor'
 
 module Grafter
   module Cli
-    class Main < Thor
-      desc 'install NAME', 'install a debootstrapped chroot'
+
+    class RootCommands < Thor
+      desc 'create NAME', 'install a debootstrapped chroot'
       option :type, default: 'ubuntu', aliases: '-t'
-      def install(name)
-        Graft.new(name, options[:type].to_sym).install
+      def create(name)
+        Root.new(name, options[:type].to_sym).create
       end
 
       desc 'destroy NAME', 'destroy a debootstrapped chroot'
       def destroy(name)
-        Graft.new(name).destroy
-      end
-
-      desc 'chroot NAME', 'chroot into graft'
-      def chroot(name)
-        Graft.new(name).chroot
+        Root.new(name).destroy
       end
 
       desc 'list', 'list chroots'
       def list
-        puts Graft.list
+        puts Root.list
       end
+    end
+
+    class Main < Thor
+      desc 'root SUBCOMMAND ...ARGS', 'manage creation of roots'
+      subcommand 'root_commands', RootCommands
+
+      #desc 'chroot NAME', 'chroot into graft'
+      #def chroot(name)
+      #  Graft.new(name).chroot
+      #end
+
+      #desc 'graft GRAFT_FILE', 'grafts stems onto a root'
+      #def graft(file)
+      #  Graft.new(file).run
+      #end
     end
   end
 end
