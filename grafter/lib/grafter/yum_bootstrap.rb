@@ -38,11 +38,6 @@ module Grafter
         chroot.run Commands::Rpm.new.install(release_rpm)
         chroot.run Commands::Yum.new.install_base
       end
-      # install via chef
-      # chroot.run('rpm', '-i', '--nodeps', epel_release_rpm)
-      # chroot.run('yum', '-y', 'groupinstall', 'Development Tools')
-      # packages = %w(libyaml-devel libxslt-devel zlib-devel openssl-devel sudo readline-devel libffi-devel openssh-server)
-      # chroot.run('yum', '-y', 'install', *packages)
     end
 
     def with_bind_from_target(dir)
