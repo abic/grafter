@@ -13,12 +13,11 @@ module Grafter
 
     def initialize(target, suite='precise', mirror='http://archive.ubuntu.com/ubuntu')
       @suite, @target, @mirror = suite, target, mirror
-      @quick_mirror = @mirror
       @security_mirror = 'http://security.ubuntu.com/ubuntu'
     end
 
     def install
-      run Commands::Debootstrap.new.debootstrap(suite, target, quick_mirror)
+      run Commands::Debootstrap.new.debootstrap(suite, target, mirror)
       update_source_list
       reconfigure_locale
       reconfigure_timezone
@@ -27,7 +26,7 @@ module Grafter
     end
 
     private
-    attr_reader :suite, :target, :mirror, :quick_mirror, :security_mirror
+    attr_reader :suite, :target, :mirror, :security_mirror
 
     def update_source_list
       FileUtils.rm_rf(Dir.glob(path_in_target('/var/lib/apt/lists/*')))
