@@ -31,7 +31,6 @@ module Grafter
 
     def run(args, options={})
       env = ENV.to_hash.select { |k| %w(TERM LANG).include?(k) }.merge(
-        'LC_ALL' => 'C',
         'HOME' => '/root',
         'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
       )
