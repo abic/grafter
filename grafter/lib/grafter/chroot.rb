@@ -1,5 +1,6 @@
 require 'grafter/commands/mount'
 require 'grafter/commands/umount'
+require 'grafter/commands/chroot'
 
 module Grafter
   class Chroot
@@ -34,7 +35,9 @@ module Grafter
         'HOME' => '/root',
         'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
       )
-      Command.new([env, 'chroot', target, *args, options.merge(unsetenv_others: true)]).run
+      env_options = options.merge(unsetenv_others: true)
+      exec_args = Commands::Chroot.new(target).command(args)
+      Command.new([env, exec_args, env_options].flatten).run
     end
 
     private
