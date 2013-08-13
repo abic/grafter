@@ -1,3 +1,6 @@
+require 'grafter/commands/mount'
+require 'grafter/commands/umount'
+
 module Grafter
   class Chroot
 
@@ -39,11 +42,17 @@ module Grafter
     attr_reader :target
 
     def mount(fs)
-      Command.new(['mount', '-o', 'bind', MOUNTS.fetch(fs), File.join(target, MOUNTS.fetch(fs))]).run
+      device = MOUNTS.fetch(fs)
+      dir = File.join(target, device)
+      exec_args = Commands::Mount.new(device, dir, bind: true).command
+      Command.new(exec_args).run
     end
 
     def unmount(fs)
-      Command.new(['umount', File.join(target, MOUNTS.fetch(fs))]).run
+      device = MOUNTS.fetch(fs)
+      dir = File.join(target, device)
+      exec_args = Commands::Umount.new(dir).command
+      Command.new(exec_args).run
     end
   end
 end

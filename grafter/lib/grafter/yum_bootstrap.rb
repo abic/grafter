@@ -1,3 +1,8 @@
+require 'grafter/commands/rpm'
+require 'grafter/commands/yum'
+require 'grafter/commands/mount'
+require 'grafter/commands/umount'
+
 module Grafter
   class YumBootstrap
     include Graftable
@@ -10,17 +15,28 @@ module Grafter
     end
 
     def install
-      FileUtils.mkdir_p(path_in_target('/var/lib/rpm'))
-      run(['rpm', '--root', target, '--rebuilddb'])
-      run(['rpm', '--root', target, '-i', '--nodeps', release_rpm])
-      with_bind_from_target('/etc/pki') do
-        run(['yum', '--installroot', target, '-y', 'install', 'yum'])
-      end
+      install_outside_chroot
+      install_inside_chroot
+    end
 
+    private
+
+    attr_reader :target, :release_rpm, :epel_release_rpm
+
+    def install_outside_chroot
+      FileUtils.mkdir_p(path_in_target('/var/lib/rpm'))
+      run Commands::Rpm.new(root: target).rebuilddb
+      run Commands::Rpm.new(root: target).install(release_rpm)
+      with_bind_from_target('/etc/pki') do
+        run Commands::Yum.new(root: target).install('yum')
+      end
+    end
+
+    def install_inside_chroot
       FileUtils.cp('/etc/resolv.conf', path_in_target('/etc/resolv.conf'))
       using_chroot do |chroot|
-        chroot.run(['rpm', '-i', '--nodeps', release_rpm])
-        chroot.run(%w(yum -y groupinstall Base))
+        chroot.run Commands::Rpm.new.install(release_rpm)
+        chroot.run Commands::Yum.new.install_base
       end
       # install via chef
       # chroot.run('rpm', '-i', '--nodeps', epel_release_rpm)
@@ -32,14 +48,11 @@ module Grafter
     def with_bind_from_target(dir)
       had_dir = Dir.exists?(dir)
       FileUtils.mkdir(dir) unless had_dir
-      run(['mount', '-o', 'bind', path_in_target(dir), dir])
+      run Commands::Mount.new(path_in_target(dir), dir, bind: true).command
       yield
     ensure
-      run(['umount', dir])
+      run Commands::Umount.new(path_in_target(dir)).command
       FileUtils.rmdir(dir) unless had_dir
     end
-
-    private
-    attr_reader :target, :release_rpm, :epel_release_rpm
   end
 end
