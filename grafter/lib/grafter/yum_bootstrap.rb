@@ -36,7 +36,7 @@ module Grafter
       FileUtils.cp('/etc/resolv.conf', path_in_target('/etc/resolv.conf'))
       using_chroot do |chroot|
         chroot.run Commands::Rpm.new.install(release_rpm)
-        chroot.run Commands::Yum.new.install_base
+        chroot.run Commands::Yum.new.group_install('Base')
       end
     end
 

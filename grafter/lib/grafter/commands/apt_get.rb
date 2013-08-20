@@ -1,16 +1,17 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class AptGet
-      def dist_upgrade
-        ['apt-get', '-y', 'dist-upgrade']
-      end
+    class AptGet < Base
+      execute 'apt-get'
+      flag :yes, default: true
 
-      def update
-        ['apt-get', '-y', 'update']
-      end
+      subcommand :dist_upgrade, command: 'dist-upgrade'
 
-      def install(package)
-        ['apt-get', '-y', 'install', package]
+      subcommand :update
+
+      subcommand :install do |s|
+        s.arg :package
       end
     end
   end

@@ -1,25 +1,17 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class Rpm
-      def initialize(global_options={})
-        @global_options = global_options
+    class Rpm < Base
+      execute 'rpm'
+      option :root
+
+      subcommand :install, command: '-i' do |s|
+        s.flag :nodeps, default: true
+        s.arg :rpm_file
       end
 
-      def install(rpm_file_location)
-        ['rpm', expand_global_options, '-i', '--nodeps', rpm_file_location].flatten
-      end
-
-      def rebuilddb
-        ['rpm', expand_global_options, '--rebuilddb'].flatten
-      end
-
-      private
-
-      attr_reader :global_options
-
-      def expand_global_options
-        global_options[:root] ? ['--root', global_options[:root]] : []
-      end
+      subcommand :rebuilddb, command: '--rebuilddb'
     end
   end
 end

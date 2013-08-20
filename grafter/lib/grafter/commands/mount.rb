@@ -1,23 +1,13 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class Mount
-      def initialize(device, dir, options={})
-        @device = device
-        @dir = dir
-        @global_options = options
-      end
+    class Mount < Base
+      execute 'mount'
+      flag :bind, arg: '-obind'
 
-      def command
-        ['mount', expand_global_options, device, dir].flatten
-      end
-
-      private
-
-      attr_reader :device, :dir, :global_options
-
-      def expand_global_options
-        global_options[:bind] ? ['-o', 'bind'] : []
-      end
+      arg :device
+      arg :dir
     end
   end
 end

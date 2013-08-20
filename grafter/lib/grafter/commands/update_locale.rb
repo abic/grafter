@@ -1,9 +1,11 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class UpdateLocale
-      def update(locale)
-        ['update-locale', "LANG=#{locale}"]
-      end
+    class UpdateLocale < Base
+      execute 'update-locale'
+
+      arg :key_pair
     end
   end
 end

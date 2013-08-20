@@ -17,7 +17,7 @@ module Grafter
     end
 
     def install
-      run Commands::Debootstrap.new.debootstrap(suite, target, mirror)
+      run Commands::Debootstrap.new(suite, target, mirror).command
       update_source_list
       reconfigure_locale
       reconfigure_timezone
@@ -41,17 +41,17 @@ module Grafter
 
     def reconfigure_locale
       using_chroot do |chroot|
-        chroot.run Commands::LocaleGen.new.generate('en_US.UTF-8')
-        chroot.run Commands::UpdateLocale.new.update('en_US.UTF-8')
-        chroot.run Commands::DpkgReconfigure.new.reconfigure('libc6')
-        chroot.run Commands::DpkgReconfigure.new.reconfigure('locales')
+        chroot.run Commands::LocaleGen.new('en_US.UTF-8').command
+        chroot.run Commands::UpdateLocale.new('LANG=en_US.UTF-8').command
+        chroot.run Commands::DpkgReconfigure.new('libc6').command
+        chroot.run Commands::DpkgReconfigure.new('locales').command
       end
     end
 
     def reconfigure_timezone
       open_in_target('/etc/timezone', 'w+') { |f| f.puts 'UTC' }
       using_chroot do |chroot|
-        chroot.run Commands::DpkgReconfigure.new.reconfigure('tzdata')
+        chroot.run Commands::DpkgReconfigure.new('tzdata').command
       end
     end
 

@@ -1,9 +1,12 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class Debootstrap
-      def debootstrap(suite, target, quick_mirror)
-        ['debootstrap', suite, target, quick_mirror]
-      end
+    class Debootstrap < Base
+      execute 'debootstrap'
+      arg :suite
+      arg :target
+      arg :mirror
     end
   end
 end

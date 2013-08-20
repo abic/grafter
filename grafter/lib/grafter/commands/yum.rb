@@ -1,24 +1,18 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class Yum
-      def initialize(global_options={})
-        @global_options = global_options
+    class Yum < Base
+      execute 'yum'
+      flag :yes, arg: '-y', default: true
+      option :root, arg: '--installroot'
+
+      subcommand :install do |s|
+        s.arg :package
       end
 
-      def install(package)
-        ['yum', expand_global_options, '-y', 'install', package].flatten
-      end
-
-      def install_base
-        %w(yum -y groupinstall Base)
-      end
-
-      private
-
-      attr_reader :global_options
-
-      def expand_global_options
-        global_options[:root] ? ['--installroot', global_options[:root]] : []
+      subcommand :group_install, command: 'groupinstall' do |s|
+        s.arg :group
       end
     end
   end

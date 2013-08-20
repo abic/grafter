@@ -1,17 +1,11 @@
+require 'grafter/commands/base'
+
 module Grafter
   module Commands
-    class Umount
-      def initialize(dir)
-        @dir = dir
-      end
+    class Umount < Base
+      execute 'umount'
 
-      def command
-        ['umount', dir]
-      end
-
-      private
-
-      attr_reader :dir
+      arg :dir
     end
   end
 end
