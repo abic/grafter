@@ -4,7 +4,7 @@ require 'thor'
 module Grafter
   module Cli
 
-    class RootCommands < Thor
+    class Roots < Thor
       desc 'create NAME', 'install a debootstrapped chroot'
       option :type, default: 'ubuntu', aliases: '-t'
       def create(name)
@@ -23,8 +23,8 @@ module Grafter
     end
 
     class Main < Thor
-      desc 'root SUBCOMMAND ...ARGS', 'manage creation of roots'
-      subcommand 'root_commands', RootCommands
+      desc 'roots SUBCOMMAND ...ARGS', 'manage creation of roots'
+      subcommand 'roots', Roots
 
       #desc 'chroot NAME', 'chroot into graft'
       #def chroot(name)
