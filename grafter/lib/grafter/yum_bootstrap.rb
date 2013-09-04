@@ -24,10 +24,10 @@ module Grafter
 
     def install_outside_chroot
       FileUtils.mkdir_p(File.join(target, '/var/lib/rpm'))
-      Command.new(Commands::Rpm.new(root: target).rebuilddb).run
-      Command.new(Commands::Rpm.new(root: target).install(release_rpm)).run
+      Commands::Rpm.new(root: target).rebuilddb.run
+      Commands::Rpm.new(root: target).install(release_rpm).run
       with_bind_from_target('/etc/pki') do
-        Command.new(Commands::Yum.new(root: target).install('yum')).run
+        Commands::Yum.new(root: target).install('yum').run
       end
     end
 
@@ -43,10 +43,10 @@ module Grafter
       bind_dir = File.join(target, dir)
       had_dir = Dir.exists?(dir)
       FileUtils.mkdir(dir) unless had_dir
-      Command.new(Commands::Mount.new(bind_dir, dir, bind: true).command).run
+      Commands::Mount.new(bind_dir, dir, bind: true).run
       yield
     ensure
-      Command.new(Commands::Umount.new(bind_dir).command).run
+      Commands::Umount.new(bind_dir).run
       FileUtils.rmdir(dir) unless had_dir
     end
   end

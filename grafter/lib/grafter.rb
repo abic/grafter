@@ -1,6 +1,3 @@
-
-
-require 'grafter/command'
 require 'grafter/chroot'
 require 'grafter/chef'
 require 'grafter/debootstrap'

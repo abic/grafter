@@ -1,3 +1,5 @@
+require 'grafter/commands/command_wrapper'
+
 module Grafter
   module Commands
     class Base
@@ -35,7 +37,7 @@ module Grafter
           end
 
           define_method(name) do |*subcommand_args|
-            command + command_class.new(*subcommand_args).command
+            CommandWrapper.new(command + command_class.new(*subcommand_args).command)
           end
           command_class
         end
@@ -72,6 +74,10 @@ module Grafter
           end
           exec_args
         end
+      end
+
+      def run
+        CommandWrapper.new(command).run
       end
 
       def command
