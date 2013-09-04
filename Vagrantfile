@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :chef_solo do |chef|
     chef.add_recipe 'apt'
     chef.add_recipe 'ruby_build'
-    chef.add_recipe 'rbenv'
+    chef.add_recipe 'rbenv::system'
     chef.add_recipe 'grafter::yum'
     chef.add_recipe 'grafter::debootstrap'
 
