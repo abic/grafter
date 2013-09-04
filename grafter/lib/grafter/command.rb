@@ -1,4 +1,5 @@
 require 'logger'
+
 module Grafter
   class Command
     def initialize(args)

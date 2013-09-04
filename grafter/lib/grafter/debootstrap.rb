@@ -9,15 +9,13 @@ require 'grafter/commands/apt_get'
 
 module Grafter
   class Debootstrap
-    include Graftable
-
     def initialize(target, suite='precise', mirror='http://archive.ubuntu.com/ubuntu')
       @suite, @target, @mirror = suite, target, mirror
       @security_mirror = 'http://security.ubuntu.com/ubuntu'
     end
 
     def install
-      run Commands::Debootstrap.new(suite, target, mirror).command
+      Command.new(Commands::Debootstrap.new(suite, target, mirror).command).run
       update_source_list
       reconfigure_locale
       reconfigure_timezone
@@ -29,9 +27,9 @@ module Grafter
     attr_reader :suite, :target, :mirror, :security_mirror
 
     def update_source_list
-      FileUtils.rm_rf(Dir.glob(path_in_target('/var/lib/apt/lists/*')))
-      open_in_target('/etc/apt/sources.list', 'w+') do |f|
-        f.write(<<-EOF)
+      FileUtils.rm_rf(Dir.glob(File.join(target, '/var/lib/apt/lists/*')))
+      File.open(File.join(target, '/etc/apt/sources.list'), 'w+') do |file|
+        file.write(<<-EOF)
           deb #{mirror} #{suite} main universe multiverse
           deb #{mirror} #{suite}-updates main universe multiverse
           deb #{security_mirror} #{suite}-security main universe multiverse
@@ -40,7 +38,7 @@ module Grafter
     end
 
     def reconfigure_locale
-      using_chroot do |chroot|
+      Chroot.new(target).use do |chroot|
         chroot.run Commands::LocaleGen.new('en_US.UTF-8').command
         chroot.run Commands::UpdateLocale.new('LANG=en_US.UTF-8').command
         chroot.run Commands::DpkgReconfigure.new('libc6').command
@@ -49,20 +47,20 @@ module Grafter
     end
 
     def reconfigure_timezone
-      open_in_target('/etc/timezone', 'w+') { |f| f.puts 'UTC' }
-      using_chroot do |chroot|
+      File.open(File.join(target, '/etc/timezone'), 'w+') { |f| f.puts 'UTC' }
+      Chroot.new(target).use do |chroot|
         chroot.run Commands::DpkgReconfigure.new('tzdata').command
       end
     end
 
     def dist_upgrade
-      using_chroot do |chroot|
+      Chroot.new(target).use do |chroot|
         chroot.run Commands::AptGet.new.update
       end
     end
 
     def install_curl
-      using_chroot do |chroot|
+      Chroot.new(target).use do |chroot|
         chroot.run Commands::AptGet.new.install('curl')
       end
     end

@@ -1,5 +1,4 @@
 module Grafter
-
   class Root
     BASE_DIR = '/var/lib/grafter/roots'
 
@@ -31,9 +30,7 @@ module Grafter
     end
 
     def chroot
-      Chroot.new(target).use do |chroot|
-        chroot.run('/bin/bash', '-l')
-      end
+      Chroot.new(target).run('/bin/bash', '-l')
     end
 
     def target

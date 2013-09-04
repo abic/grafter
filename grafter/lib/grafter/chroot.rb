@@ -4,30 +4,22 @@ require 'grafter/commands/chroot'
 
 module Grafter
   class Chroot
-
-    MOUNTS = {
-      proc: '/proc',
-      sysfs: '/sys',
-      dev: '/dev',
-      devpts: '/dev/pts'
-    }
-
     def initialize(target)
       @target = target
     end
 
     def use
-      mount :proc
-      mount :sysfs
-      mount :dev
-      mount :devpts
+      mount '/proc'
+      mount '/sys'
+      mount '/dev'
+      mount '/dev/pts'
 
       yield self
     ensure
-      unmount :devpts
-      unmount :dev
-      unmount :sysfs
-      unmount :proc
+      unmount '/dev/pts'
+      unmount '/dev'
+      unmount '/sys'
+      unmount '/proc'
     end
 
     def run(args, options={})
@@ -43,15 +35,13 @@ module Grafter
     private
     attr_reader :target
 
-    def mount(fs)
-      device = MOUNTS.fetch(fs)
+    def mount(device)
       dir = File.join(target, device)
       exec_args = Commands::Mount.new(device, dir, bind: true).command
       Command.new(exec_args).run
     end
 
-    def unmount(fs)
-      device = MOUNTS.fetch(fs)
+    def unmount(device)
       dir = File.join(target, device)
       exec_args = Commands::Umount.new(dir).command
       Command.new(exec_args).run
